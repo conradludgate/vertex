@@ -14,6 +14,10 @@
             height: 95%;
             aspect-ratio: 1;
         }
+
+        input {
+            font-size: 32px;
+        }
     </style>
 </head>
 <body>
@@ -25,7 +29,7 @@
     <script>
         function* vertex(n, m) {
             let x = 1;
-            for (let i = 0; i < n * m; i++) {
+            for (let i = 0; i < (n * m); i++) {
                 x *= n;
                 x %= m;
                 yield x;
@@ -38,7 +42,7 @@
 
         function setSize() {
             let s = Math.min(content.clientWidth, content.clientHeight);
-            let wh = Math.floor(s * 0.90);
+            let wh = Math.floor(s * 0.80);
             canvas.width = wh;
             canvas.height = wh;
             canvas.style.width = wh;
@@ -68,22 +72,26 @@
             ctx.arc(w2, h2, w2, 0, 2 * Math.PI);
             ctx.strokeStyle = "red";
             ctx.stroke();
+            ctx.strokeStyle = "black";
 
             let points = new Array(m);
             for (let i = 0; i < m; i++) {
                 let theta = i / m * circle - quarter;
                 points[i] = {x: w2 + w2 * Math.cos(theta), y: h2 + h2 * Math.sin(theta)};
+
+                ctx.beginPath();
+                ctx.arc(points[i].x, points[i].y, 5, 0, 2 * Math.PI);
+                ctx.fill();
             }
 
-            ctx.moveTo(points[1].x, points[1].y);
             ctx.beginPath();
+            ctx.moveTo(points[1].x, points[1].y);
 
             let gen = vertex(n, m);
             for(let v of gen) {
                 ctx.lineTo(points[v].x, points[v].y)
             }
 
-            ctx.strokeStyle = "black";
             ctx.stroke()
         }
 
