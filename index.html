@@ -1,0 +1,116 @@
+<html>
+<head>
+    <style>
+        #content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #canvas {
+            width: 95%;
+            height: 95%;
+            aspect-ratio: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <canvas id="canvas"></canvas>
+        <label id="nlabel" for="n">Multiplier:</label><input type="number" min="2" value="2" id="n">
+        <label id="mlabel" for="m">Modulus:</label><input type="number" min="2" value="9" id="m">
+    </div>
+    <script>
+        function* vertex(n, m) {
+            let x = 1;
+            for (let i = 0; i < n * m; i++) {
+                x *= n;
+                x %= m;
+                yield x;
+            }
+        }
+
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let content = document.getElementById("content");
+
+        function setSize() {
+            let s = Math.min(content.clientWidth, content.clientHeight);
+            let wh = Math.floor(s * 0.90);
+            canvas.width = wh;
+            canvas.height = wh;
+            canvas.style.width = wh;
+            canvas.style.height = wh;
+            canvas.style["margin-top"] = s * 0.025;
+            canvas.style["margin-bottom"] = s * 0.01;
+        }
+
+        let _n = document.getElementById("n");
+        let _m = document.getElementById("m");
+
+        let quarter = Math.PI / 2;
+        let circle = Math.PI * 2;
+
+        function draw() {
+            let n = _n.value;
+            let m = _m.value;
+
+            let w = canvas.width;
+            let h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            let w2 = w / 2;
+            let h2 = h / 2;
+
+            ctx.beginPath();
+            ctx.arc(w2, h2, w2, 0, 2 * Math.PI);
+            ctx.strokeStyle = "red";
+            ctx.stroke();
+
+            let points = new Array(m);
+            for (let i = 0; i < m; i++) {
+                let theta = i / m * circle - quarter;
+                points[i] = {x: w2 + w2 * Math.cos(theta), y: h2 + h2 * Math.sin(theta)};
+            }
+
+            ctx.moveTo(points[1].x, points[1].y);
+            ctx.beginPath();
+
+            let gen = vertex(n, m);
+            for(let v of gen) {
+                ctx.lineTo(points[v].x, points[v].y)
+            }
+
+            ctx.strokeStyle = "black";
+            ctx.stroke()
+        }
+
+        // redraw on input change
+        _n.addEventListener("input", () => {
+            document.getElementById("nlabel").innerText = `Multiplier: ${_n.value}`
+            draw();
+        });
+        _m.addEventListener("input", () => {
+            document.getElementById("mlabel").innerText = `Modulus: ${_m.value}`
+            draw();
+        });
+
+        // update canvas size and redraw on window resize
+        window.addEventListener("resize", function () {
+            setSize();
+            draw();
+        });
+
+        // mobile coordinates are weird. delay a little so the renderer has a chance to update properly
+        setTimeout(() => {
+            setSize();
+            draw();
+        }, 200);
+
+        document.getElementById("nlabel").innerText = `Multiplier: ${_n.value}`
+        document.getElementById("mlabel").innerText = `Modulus: ${_m.value}`
+    </script>
+</body>
+</html>
